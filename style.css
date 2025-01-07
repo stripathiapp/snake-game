@@ -7,6 +7,22 @@ body {
     background-color: #f0f0f0;
 }
 
+#game-container {
+    text-align: center;
+}
+
 #gameCanvas {
     border: 1px solid black;
+    display: block;
+    margin: 0 auto;
+}
+
+#info {
+    margin-top: 10px;
+}
+
+#restartButton {
+    padding: 5px 15px;
+    font-size: 16px;
+    cursor: pointer;
 }
