@@ -7,20 +7,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="rules">
-            <h2>Game Rules:</h2>
-            <ul>
-                <li>Press any arrow key to start.</li>
-                <li>Use <b>Arrow Left</b> to rotate the snake counterclockwise.</li>
-                <li>Use <b>Arrow Right</b> to rotate the snake clockwise.</li>
-                <li>The snake moves automatically based on the last direction.</li>
-                <li>Collect red food blocks to grow your snake.</li>
-                <li>Avoid crashing into walls or yourself.</li>
-            </ul>
-        </div>
+    <div id="startScreen">
+        <h1>Snake Game</h1>
+        <button id="startButton">Start</button>
     </div>
+    <canvas id="gameCanvas" style="display: none;"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
