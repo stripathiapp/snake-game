@@ -3,139 +3,114 @@ const ctx = canvas.getContext("2d");
 
 const gridSize = 20;
 const tileCount = 20;
-let xVelocity = 0;
-let yVelocity = 0;
-let snake = [{ x: 10, y: 10 }];
-let food = { x: 15, y: 15 };
+let snake = [{ x: 10 * gridSize, y: 10 * gridSize }];
+let angle = Math.random() * 2 * Math.PI; // Initial random direction
+let food = { x: Math.floor(Math.random() * tileCount) * gridSize, y: Math.floor(Math.random() * tileCount) * gridSize };
 let score = 0;
-let gameRunning = true;
-let speed = 100; // Initial speed in milliseconds
-let speedTimer = 7; // Speed increase interval in seconds
-let speedFactor = 2; // Multiplier for speed increase
-let speedCountdown = speedTimer;
+let gameRunning = false;
+let countdown = 3; // Countdown before the game starts
+let rotationAngle = Math.PI / 18; // Rotation step (10 degrees)
 
-const scoreElement = document.getElementById("score");
-const timerElement = document.getElementById("speed-timer");
-const restartButton = document.getElementById("restartButton");
+// Display initial game rules
+const rulesElement = document.getElementById("rules");
+canvas.width = canvas.height = gridSize * tileCount;
 
-function gameLoop() {
-    if (gameRunning) {
-        update();
-        draw();
-        setTimeout(gameLoop, speed);
-    }
-}
-
-function update() {
-    const head = { x: snake[0].x + xVelocity, y: snake[0].y + yVelocity };
-
-    // Check if the snake hits the border or itself
-    if (
-        head.x < 0 || head.y < 0 ||
-        head.x >= tileCount || head.y >= tileCount ||
-        snake.some(segment => segment.x === head.x && segment.y === head.y)
-    ) {
-        if (gameRunning) {
-            gameRunning = false;
-            alert("Game Over! Press Restart or Space to play again.");
-        }
-        return; // Stop further execution of the update
-    }
-
+// Function to move the snake
+function moveSnake() {
+    const head = { ...snake[0] };
+    head.x += Math.cos(angle) * gridSize;
+    head.y += Math.sin(angle) * gridSize;
     snake.unshift(head);
 
-    // Check if the snake eats the food
     if (head.x === food.x && head.y === food.y) {
         score++;
-        scoreElement.textContent = `Score: ${score}`;
         food = {
-            x: Math.floor(Math.random() * tileCount),
-            y: Math.floor(Math.random() * tileCount)
+            x: Math.floor(Math.random() * tileCount) * gridSize,
+            y: Math.floor(Math.random() * tileCount) * gridSize
         };
     } else {
         snake.pop();
     }
 }
 
-function draw() {
+// Function to check collisions
+function checkCollision() {
+    const head = snake[0];
+    if (
+        head.x < 0 || head.y < 0 ||
+        head.x >= canvas.width || head.y >= canvas.height ||
+        snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)
+    ) {
+        gameRunning = false;
+        alert("Game Over! Press any arrow key to restart.");
+        resetGame();
+    }
+}
+
+// Draw the game elements
+function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw snake
+    // Draw the snake
     ctx.fillStyle = "green";
     snake.forEach(segment => {
-        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+        ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
     });
 
-    // Draw food
+    // Draw the food
     ctx.fillStyle = "red";
-    ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+    ctx.fillRect(food.x, food.y, gridSize, gridSize);
 }
 
-function startSpeedTimer() {
-    const timerInterval = setInterval(() => {
-        if (!gameRunning) {
-            clearInterval(timerInterval);
-            return;
-        }
-
-        speedCountdown--;
-        timerElement.textContent = `Speed increase in: ${speedCountdown}s`;
-
-        if (speedCountdown === 0) {
-            speed /= speedFactor; // Double the speed
-            speedCountdown = speedTimer; // Reset the countdown
-        }
-    }, 1000);
+// Countdown before game starts
+function startCountdown() {
+    if (countdown > 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = "50px Arial";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.fillText(countdown, canvas.width / 2, canvas.height / 2);
+        countdown--;
+        setTimeout(startCountdown, 1000);
+    } else {
+        gameRunning = true;
+        gameLoop();
+    }
 }
 
+// Game loop
+function gameLoop() {
+    if (gameRunning) {
+        moveSnake();
+        checkCollision();
+        drawGame();
+        setTimeout(gameLoop, 100);
+    }
+}
+
+// Handle key press for rotation
 document.addEventListener("keydown", event => {
-    switch (event.key) {
-        case "ArrowUp":
-            if (yVelocity === 0) {
-                xVelocity = 0;
-                yVelocity = -1;
-            }
-            break;
-        case "ArrowDown":
-            if (yVelocity === 0) {
-                xVelocity = 0;
-                yVelocity = 1;
-            }
-            break;
-        case "ArrowLeft":
-            if (xVelocity === 0) {
-                xVelocity = -1;
-                yVelocity = 0;
-            }
-            break;
-        case "ArrowRight":
-            if (xVelocity === 0) {
-                xVelocity = 1;
-                yVelocity = 0;
-            }
-            break;
-        case " ":
-            restartGame();
-            break;
+    if (!gameRunning && countdown === 3) {
+        rulesElement.style.display = "none";
+        startCountdown();
+        return;
+    }
+
+    if (gameRunning) {
+        if (event.key === "ArrowLeft") {
+            angle -= rotationAngle; // Rotate counterclockwise
+        } else if (event.key === "ArrowRight") {
+            angle += rotationAngle; // Rotate clockwise
+        }
     }
 });
 
-restartButton.addEventListener("click", restartGame);
-
-function restartGame() {
+// Reset the game
+function resetGame() {
+    snake = [{ x: 10 * gridSize, y: 10 * gridSize }];
+    angle = Math.random() * 2 * Math.PI;
+    food = { x: Math.floor(Math.random() * tileCount) * gridSize, y: Math.floor(Math.random() * tileCount) * gridSize };
     score = 0;
-    scoreElement.textContent = `Score: ${score}`;
-    snake = [{ x: 10, y: 10 }];
-    xVelocity = 0;
-    yVelocity = 0;
-    food = { x: 15, y: 15 };
-    speed = 100; // Reset speed
-    speedCountdown = speedTimer; // Reset countdown
-    gameRunning = true;
-    timerElement.textContent = `Speed increase in: ${speedCountdown}s`;
-    gameLoop();
+    countdown = 3;
+    rulesElement.style.display = "block";
 }
-
-canvas.width = canvas.height = gridSize * tileCount;
-startSpeedTimer();
-gameLoop();
