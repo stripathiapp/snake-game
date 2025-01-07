@@ -8,11 +8,12 @@ let angle = Math.random() * 2 * Math.PI; // Initial random direction
 let food = { x: Math.floor(Math.random() * tileCount) * gridSize, y: Math.floor(Math.random() * tileCount) * gridSize };
 let score = 0;
 let gameRunning = false;
-let countdown = 3; // Countdown before the game starts
 let rotationAngle = Math.PI / 18; // Rotation step (10 degrees)
 
-// Display initial game rules
-const rulesElement = document.getElementById("rules");
+// Game initialization
+const startScreen = document.getElementById("startScreen");
+const startButton = document.getElementById("startButton");
+
 canvas.width = canvas.height = gridSize * tileCount;
 
 // Function to move the snake
@@ -42,7 +43,7 @@ function checkCollision() {
         snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)
     ) {
         gameRunning = false;
-        alert("Game Over! Press any arrow key to restart.");
+        alert("Game Over! Press Start to play again.");
         resetGame();
     }
 }
@@ -62,22 +63,6 @@ function drawGame() {
     ctx.fillRect(food.x, food.y, gridSize, gridSize);
 }
 
-// Countdown before game starts
-function startCountdown() {
-    if (countdown > 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = "50px Arial";
-        ctx.fillStyle = "black";
-        ctx.textAlign = "center";
-        ctx.fillText(countdown, canvas.width / 2, canvas.height / 2);
-        countdown--;
-        setTimeout(startCountdown, 1000);
-    } else {
-        gameRunning = true;
-        gameLoop();
-    }
-}
-
 // Game loop
 function gameLoop() {
     if (gameRunning) {
@@ -90,12 +75,6 @@ function gameLoop() {
 
 // Handle key press for rotation
 document.addEventListener("keydown", event => {
-    if (!gameRunning && countdown === 3) {
-        rulesElement.style.display = "none";
-        startCountdown();
-        return;
-    }
-
     if (gameRunning) {
         if (event.key === "ArrowLeft") {
             angle -= rotationAngle; // Rotate counterclockwise
@@ -111,6 +90,14 @@ function resetGame() {
     angle = Math.random() * 2 * Math.PI;
     food = { x: Math.floor(Math.random() * tileCount) * gridSize, y: Math.floor(Math.random() * tileCount) * gridSize };
     score = 0;
-    countdown = 3;
-    rulesElement.style.display = "block";
+    startScreen.style.display = "block";
+    canvas.style.display = "none";
 }
+
+// Start the game when the button is clicked
+startButton.addEventListener("click", () => {
+    startScreen.style.display = "none";
+    canvas.style.display = "block";
+    gameRunning = true;
+    gameLoop();
+});
