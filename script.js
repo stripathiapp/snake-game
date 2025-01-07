@@ -1,22 +1,112 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
 const gridSize = 20;
-const tileCount = 20;
-let snake = [{ x: 10 * gridSize, y: 10 * gridSize }];
-let angle = Math.random() * 2 * Math.PI; // Initial random direction
-let food = { x: Math.floor(Math.random() * tileCount) * gridSize, y: Math.floor(Math.random() * tileCount) * gridSize };
+const canvasSize = 400;
+let snake = [{ x: gridSize * 5, y: gridSize * 5 }];
+let direction = { x: gridSize, y: 0 };
+let food = getRandomFoodPosition();
 let score = 0;
-let gameRunning = false;
-let rotationAngle = Math.PI / 18; // Rotation step (10 degrees)
+let highScore = localStorage.getItem('highScore') || 0;
 
-// Game initialization
-const startScreen = document.getElementById("startScreen");
-const startButton = document.getElementById("startButton");
+document.getElementById('high-score').innerText = `High Score: ${highScore}`;
 
-canvas.width = canvas.height = gridSize * tileCount;
+function gameLoop() {
+    if (isGameOver()) {
+        alert('Game Over');
+        resetGame();
+        return;
+    }
 
-// Function to move the snake
+    setTimeout(() => {
+        clearCanvas();
+        drawFood();
+        moveSnake();
+        drawSnake();
+        gameLoop();
+    }, 100);
+}
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
+}
+
+function drawSnake() {
+    ctx.fillStyle = 'green';
+    snake.forEach(segment => ctx.fillRect(segment.x, segment.y, gridSize, gridSize));
+}
+
 function moveSnake() {
-    const head = { ...snake[0] };
-    head.x += Math
+    const newHead = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+    if (newHead.x === food.x && newHead.y === food.y) {
+        snake.unshift(newHead);
+        score++;
+        document.getElementById('score').innerText = `Score: ${score}`;
+        food = getRandomFoodPosition();
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('highScore', highScore);
+            document.getElementById('high-score').innerText = `High Score: ${highScore}`;
+        }
+    } else {
+        snake.pop();
+        snake.unshift(newHead);
+    }
+}
+
+function drawFood() {
+    ctx.fillStyle = 'red';
+    ctx.fillRect(food.x, food.y, gridSize, gridSize);
+}
+
+function getRandomFoodPosition() {
+    let position;
+    do {
+        position = {
+            x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
+            y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize
+        };
+    } while (snake.some(segment => segment.x === position.x && segment.y === position.y));
+    return position;
+}
+
+function isGameOver() {
+    const head = snake[0];
+    if (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize) {
+        return true;
+    }
+    for (let i = 1; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function resetGame() {
+    snake = [{ x: gridSize * 5, y: gridSize * 5 }];
+    direction = { x: gridSize, y: 0 };
+    food = getRandomFoodPosition();
+    score = 0;
+    document.getElementById('score').innerText = `Score: ${score}`;
+}
+
+window.addEventListener('keydown', e => {
+    switch (e.key) {
+        case 'ArrowUp':
+            if (direction.y === 0) direction = { x: 0, y: -gridSize };
+            break;
+        case 'ArrowDown':
+            if (direction.y === 0) direction = { x: 0, y: gridSize };
+            break;
+        case 'ArrowLeft':
+            if (direction.x === 0) direction = { x: -gridSize, y: 0 };
+            break;
+        case 'ArrowRight':
+            if (direction.x === 0) direction = { x: gridSize, y: 0 };
+            break;
+    }
+});
+
+gameLoop();
