@@ -2,7 +2,6 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const gridSize = 20;
-const canvasSize = 400;
 let snake = [{ x: gridSize * 5, y: gridSize * 5 }];
 let direction = { x: gridSize, y: 0 };
 let food = getRandomFoodPosition();
@@ -28,7 +27,7 @@ function gameLoop() {
 }
 
 function clearCanvas() {
-    ctx.clearRect(0, 0, canvasSize, canvasSize);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function drawSnake() {
@@ -64,8 +63,8 @@ function getRandomFoodPosition() {
     let position;
     do {
         position = {
-            x: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize,
-            y: Math.floor(Math.random() * (canvasSize / gridSize)) * gridSize
+            x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
+            y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize
         };
     } while (snake.some(segment => segment.x === position.x && segment.y === position.y));
     return position;
@@ -73,7 +72,7 @@ function getRandomFoodPosition() {
 
 function isGameOver() {
     const head = snake[0];
-    if (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize) {
+    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
         return true;
     }
     for (let i = 1; i < snake.length; i++) {
@@ -109,4 +108,9 @@ window.addEventListener('keydown', e => {
     }
 });
 
-gameLoop();
+document.getElementById('up').addEventListener('click', () => {
+    if (direction.y === 0) direction = { x: 0, y: -gridSize };
+});
+document.getElementById('down').add
+::contentReference[oaicite:0]{index=0}
+ 
