@@ -9,15 +9,20 @@ let snake = [{ x: 10, y: 10 }];
 let food = { x: 15, y: 15 };
 let score = 0;
 let gameRunning = true;
+let speed = 100; // Initial speed in milliseconds
+let speedTimer = 7; // Speed increase interval in seconds
+let speedFactor = 2; // Multiplier for speed increase
+let speedCountdown = speedTimer;
 
 const scoreElement = document.getElementById("score");
+const timerElement = document.getElementById("speed-timer");
 const restartButton = document.getElementById("restartButton");
 
 function gameLoop() {
     if (gameRunning) {
         update();
         draw();
-        setTimeout(gameLoop, 100);
+        setTimeout(gameLoop, speed);
     }
 }
 
@@ -26,8 +31,8 @@ function update() {
 
     // Check if the snake hits the border or itself
     if (
-        head.x < 0 || head.y < 0 || 
-        head.x >= tileCount || head.y >= tileCount || 
+        head.x < 0 || head.y < 0 ||
+        head.x >= tileCount || head.y >= tileCount ||
         snake.some(segment => segment.x === head.x && segment.y === head.y)
     ) {
         gameRunning = false;
@@ -62,6 +67,23 @@ function draw() {
     // Draw food
     ctx.fillStyle = "red";
     ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+}
+
+function startSpeedTimer() {
+    const timerInterval = setInterval(() => {
+        if (!gameRunning) {
+            clearInterval(timerInterval);
+            return;
+        }
+
+        speedCountdown--;
+        timerElement.textContent = `Speed increase in: ${speedCountdown}s`;
+
+        if (speedCountdown === 0) {
+            speed /= speedFactor; // Double the speed
+            speedCountdown = speedTimer; // Reset the countdown
+        }
+    }, 1000);
 }
 
 document.addEventListener("keydown", event => {
@@ -105,9 +127,14 @@ function restartGame() {
     xVelocity = 0;
     yVelocity = 0;
     food = { x: 15, y: 15 };
+    speed = 100; // Reset speed
+    speedCountdown = speedTimer; // Reset countdown
     gameRunning = true;
+    timerElement.textContent = `Speed increase in: ${speedCountdown}s`;
     gameLoop();
 }
 
 canvas.width = canvas.height = gridSize * tileCount;
+startSpeedTimer();
 gameLoop();
+
