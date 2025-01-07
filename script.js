@@ -35,9 +35,11 @@ function update() {
         head.x >= tileCount || head.y >= tileCount ||
         snake.some(segment => segment.x === head.x && segment.y === head.y)
     ) {
-        gameRunning = false;
-        alert("Game Over! Press Restart or Space to play again.");
-        return;
+        if (gameRunning) {
+            gameRunning = false;
+            alert("Game Over! Press Restart or Space to play again.");
+        }
+        return; // Stop further execution of the update
     }
 
     snake.unshift(head);
@@ -137,4 +139,3 @@ function restartGame() {
 canvas.width = canvas.height = gridSize * tileCount;
 startSpeedTimer();
 gameLoop();
-
