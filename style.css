@@ -5,10 +5,25 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
 }
 
-#game-container {
+#startScreen {
     text-align: center;
+}
+
+#startButton {
+    padding: 10px 20px;
+    font-size: 20px;
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#startButton:hover {
+    background-color: darkgreen;
 }
 
 #gameCanvas {
@@ -16,13 +31,4 @@ body {
     display: block;
     margin: 0 auto;
     background-color: #fff;
-}
-
-#rules {
-    margin-top: 20px;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    text-align: left;
-    width: 300px;
-    margin: 0 auto;
 }
